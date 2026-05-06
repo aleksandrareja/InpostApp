@@ -10,7 +10,7 @@ import time
 import numpy as np
 from scipy.spatial import cKDTree
 
-app = FastAPI(title="InPost Resilience Auditor API v3.0")
+app = FastAPI(title="InPost Resilience Auditor API")
 
 app.add_middleware(
     CORSMiddleware,
