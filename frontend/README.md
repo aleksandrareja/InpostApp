@@ -1,70 +1,115 @@
-# Getting Started with Create React App
+# InPost Resilience Auditor (IRA) v3.2
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+IRA is a high-performance logistics network analysis tool designed to identify critical vulnerabilities in the InPost parcel locker network. Using Graph Theory and Geospatial Analysis, the system detects "Logistical Islands" (isolated points), "Deadly Loops" (circular recommendations), and "Bottlenecks" (network pressure points).
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Key Features
 
-### `npm start`
+### Smart Resilience Scoring
+A 0–100 score based on isolation, backup distance, and network pressure.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Deadly Loop Detection
+Identifies circular locker recommendations that have no "exit nodes" for couriers.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### High-Pressure Isolation Analysis
+Distinguishes between "lonely" lockers in rural areas and critical isolated points in high-demand urban zones.
 
-### `npm test`
+### Interactive War Room Map
+A React-Leaflet powered map with dynamic viewport filtering and LOD (Level of Detail) rendering for thousands of points.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Performance Engine
+Backend powered by Scipy cKDTree for lightning-fast cannibalism checks (≤50m) and NetworkX for graph topology.
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Tech Stack
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Backend
+Python 3.10+, FastAPI, NetworkX, Pandas, NumPy, Scipy, Geopy.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Frontend
+React 18, Tailwind CSS, Leaflet, React-Leaflet.
 
-### `npm run eject`
+### Data Source
+InPost Global Points API.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Installation & Setup
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### Prerequisites
+- Python 3.10 or higher  
+- Node.js (v16 or higher) & npm  
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## 1. Backend Setup
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Navigate to the backend directory:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+"cd backend"
 
-### Code Splitting
+Create and activate a virtual environment:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+"python -m venv venv"  
+"# On Windows:"  
+"venv\\Scripts\\activate"  
+"# On macOS/Linux:"  
+"source venv/bin/activate"
 
-### Analyzing the Bundle Size
+Install dependencies:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+"pip install fastapi uvicorn httpx networkx geopy numpy scipy pandas"
 
-### Making a Progressive Web App
+Start the FastAPI server:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+"uvicorn main:app --reload"
 
-### Advanced Configuration
+The API will be available at:  
+http://localhost:8000
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 2. Frontend Setup
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Navigate to the frontend directory:
 
-### `npm run build` fails to minify
+"cd frontend"
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Install packages:
+
+"npm install"
+
+Start the React development server:
+
+"npm start"
+
+The dashboard will be available at:  
+http://localhost:3000
+
+---
+
+## Logic & Scoring (v3.2)
+
+The auditor uses a weighted hierarchy to determine risk:
+
+- **80 pts**: Critical Isolation – No valid backup lockers available while under network pressure  
+- **75 pts**: Deadly Loop – Two lockers recommending only each other (A ↔ B), trapping couriers and customers  
+- **60 pts**: Critical Distance – Nearest backup is more than 2.5 km away  
+- **45 pts**: Bottleneck – A locker acting as a backup for more than 10 other machines  
+
+---
+
+## API Documentation
+
+### GET /api/analyze
+
+Fetches and analyzes lockers for a specific country.
+
+### Parameters
+- country (optional): e.g., PL, GB, IT  
+- max_pages (default: 50): Number of pages to fetch from InPost API  
+
+### Response
+AnalysisResponse object containing a list of RiskDetail objects.
